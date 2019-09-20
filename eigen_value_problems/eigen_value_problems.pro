@@ -6,11 +6,7 @@ CONFIG -= qt
 SOURCES += \
         main.cpp
 
-INCLUDEPATH += D:\armadillo-9.700.2\include
-DEPENDPATH += D:\armadillo-9.700.2\include
+INCLUDEPATH += /usr/local/include
+LIBS += -L/usr/local/Cellar
 
-
-LIBS += \
-    -LD:\armadillo-9.700.2\examples\lib_win64 \
-    -llapack_win64_MT \
-    -lblas_win64_MT
+LIBS += -larmadillo -llapack -lblas
