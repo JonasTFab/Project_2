@@ -1,5 +1,5 @@
 #include <iostream>
-//#include <armadillo>
+#include <armadillo>
 int main(){
 
  std::cout << "aaa" << std::endl;
