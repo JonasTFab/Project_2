@@ -1,21 +1,25 @@
 #include <iostream>
 #include <armadillo>
+#include <cmath>
 
-using namespace std;
+double lambda_analytical(int N, double j,double d,double a){
+    double lambda = d + 2*a* std::cos(j*M_PI/(N+1));
+    return lambda;
+}
 
 int main(){
     unsigned int n = 5;
-    int diag = 5;
-    int semi_diag = 3;
+    int d = 5;
+    int a = 3;
     arma::Mat<double> A = arma::mat(n,n); A.zeros();
 
 
     for(unsigned int i=0; i<n-1; i++){
-        A(i,i) = diag;
-        A(i+1,i) = semi_diag;
-        A(i,i+1) = semi_diag;
+        A(i,i) = d;
+        A(i+1,i) = a;
+        A(i,i+1) = a;
     }
-    A(n-1,n-1) = diag;
+    A(n-1,n-1) = d;
 
     // Finds eigenvalues of matrix A stored in vector "eigval".
     // Then the eigenvectors in a matrix P. At last creates a
@@ -32,8 +36,15 @@ int main(){
 
     arma::Mat<double> A_2 = P * D * P_t;
 
-    //cout << P_t << endl << D << endl << P << endl << A_2 << endl;
+    arma::Col<double> lambs(n);
+    for(unsigned int j=0; j<n; j++){
+        lambs(j) = lambda_analytical(n, j+1, d, a);
+    }
 
+
+    //std::cout << P_t << std::endl << D << std::endl << P << std::endl << A_2 << std::endl;
+    //std::cout << "Comparing the armadillos version of eigenvalues with the analytical solution:" << std::endl
+    //     << "Armadillo:" << std::endl << eigval << std::endl << "Analytic:" << std::endl << lambs << std::endl;
 
 
     return 0;
