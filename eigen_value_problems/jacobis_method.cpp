@@ -5,27 +5,6 @@
 using namespace std;
 using namespace arma;
 
-int main(){
-    unsigned int n = 5;
-    int diag = 5;
-    int semi_diag = 3;
-    //double tol = 10e-8;
-    arma::Mat <double> A = arma::mat(n,n); A.zeros();
-
-    for(unsigned int i=0; i<n-1; i++){
-        A(i,i) = diag;
-        A(i+1,i) = semi_diag;
-        A(i,i+1) = semi_diag;
-      }
-
-    A(n-1,n-1) = diag;
-
-    cout << A << endl;
-    //non_diag(A,float k,double l,n);
-
-    return A;
-}
-//cout << A << endl;
 
 // the offdiag function
 int non_diag(mat A,mat R, int k, int l, int n){
@@ -75,6 +54,69 @@ int non_diag(mat A,mat R, int k, int l, int n){
     R(i,k) = c*r_ik - s*r_il;
     R(i,l) = c*r_il + s*r_ik;
     }
+    cout << R << endl;
+    cout << A << endl;
     //slutt paa plagiat
     return 0;
     }
+
+
+int main(){
+    unsigned int n = 5;
+    int diag = 5;
+    int semi_diag = 3;
+    //double tol = 10e-8;
+    arma::Mat <double> A = arma::mat(n,n); A.zeros();
+
+    for(unsigned int i=0; i<n-1; i++){
+        A(i,i) = diag;
+        A(i+1,i) = semi_diag;
+        A(i,i+1) = semi_diag;
+      }
+    A(n-1,n-1) = diag;
+
+    //plagiat
+    // Setting up the eigenvector matrix
+    arma::Mat <double> R = arma::mat(n,n); R.zeros();
+    for ( int i = 0; i < n; i++ ) {
+      for ( int j = 0; j < n; j++ ) {
+        if ( i == j ) {
+          R(i,j) = 1.0;
+          }
+       else {
+         R(i,j) = 0.0;
+       }
+     }
+   }
+   cout << R << endl;
+    //non_diag(A,float k,double l,n);
+    int k = 2;
+    int l = 2;
+    non_diag(A,R,k,l,n);
+    return 0;
+    }
+
+
+
+
+
+    /*int main(){
+        unsigned int n = 5;
+        int diag = 5;
+        int semi_diag = 3;
+        //double tol = 10e-8;
+        arma::Mat <double> A = arma::mat(n,n); A.zeros();
+
+        for(unsigned int i=0; i<n-1; i++){
+            A(i,i) = diag;
+            A(i+1,i) = semi_diag;
+            A(i,i+1) = semi_diag;
+          }
+
+        A(n-1,n-1) = diag;
+
+        cout << A << endl;
+        //non_diag(A,float k,double l,n);
+
+        return 0;
+    }*/
