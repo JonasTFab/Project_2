@@ -3,7 +3,7 @@
 #include <cmath>
 
 using namespace std;
-//using namespace arma;
+using namespace arma;
 
 
 double lambda_analytical(int N, double j,double d,double a){
@@ -12,19 +12,23 @@ double lambda_analytical(int N, double j,double d,double a){
 }
 
 
-double jacobis_method(arma::mat A,int n){
-    double tol = 10e-6;
-    double max = 2*tol;
+double jacobis_method(arma::mat A,double d, double a, int n){
+    double tol = 10e-8;
+    double max = 2*tol;                // just to make max a little bigger than the tolerance before the while loop
     int k,l,iter,iter_max;
     double c, s, tou, t_1, t_2, t,a_kk, a_ll, a_ik, a_il, r_ik, r_il;
+    arma::Mat<double> A_og = A;                 // store the original input matrix
     iter = 0;
     iter_max = n*n*n;
-    // Setting up the eigenvector matrix
-    arma::Mat<double> R = arma::mat(n,n); R.eye();         // R.eye() automatically sets identity matrix
+
+    // Setting up the eigenvector matrix (R.eye() automatically sets identity matrix)
+    arma::Mat<double> R = arma::mat(n,n); R.eye();
+
+    // finds max value of off-diagonal elements assuming symmetric matrix
     while (max > tol && iter < iter_max){
         iter++;
         max = tol;
-        for (int i = 0; i < n; i++){           // finds max value of off-diagonal elements assuming symmetric matrix
+        for (int i = 0; i < n; i++){
             for (int j = i+1; j < n; j++){
                 double aij = abs(A(i,j));
                 if (aij > max){
@@ -66,13 +70,18 @@ double jacobis_method(arma::mat A,int n){
                 A(k,i) = A(i,k);
                 A(i,l) = c*a_il + s*a_ik;
                 A(l,i) = A(i,l);
-        }
+            }
 
-        //compute eigenvectors
-        r_ik = R(i,k);
-        r_il = R(i,l);
-        R(i,k) = c*r_ik - s*r_il;
-        R(i,l) = c*r_il + s*r_ik;
+            //compute eigenvectors
+            r_ik = R(i,k);
+            r_il = R(i,l);
+            R(i,k) = c*r_ik - s*r_il;
+            R(i,l) = c*r_il + s*r_ik;
+        }
+        arma::Mat<double> A_t = A.t();
+        for (int i=0; i<n; i++){
+            arma::Col<double> A_t_col_vec = A_t(i)
+            arma::Col<double> dot = arma::dot(A_t, A_og);
         }
     }       // end of while loop
 
@@ -81,38 +90,37 @@ double jacobis_method(arma::mat A,int n){
         e_val(i) = A(i,i);
     }
 
-    std::cout << "Iterations out of max: " << iter << ":" << iter_max << endl << e_val << endl;
-    //std::cout << "Iterations out of max: " << iter << ":" << iter_max << endl << R << endl << A << endl;
+    //std::cout << "Iterations out of max: " << iter << ":" << iter_max << endl << e_val << endl;
     //slutt paa plagiat
 
 
+    // test 1: comparing the analytical and numerical eigenvalues
+    arma::Col<double> sorted_e_val, e_val_analytic(n), sorted_e_val_analytic, diff;
+    sorted_e_val = arma::sort(e_val);
+    for(int i=0; i<n; i++){                // analytical calculations
+        e_val_analytic(i) = lambda_analytical(n, i+1, d, a);
+    }
+    sorted_e_val_analytic = arma::sort(e_val_analytic);
+    for (int i=0; i<n; i++){
+        double diff = sorted_e_val(i) - sorted_e_val_analytic(i);
+        if (diff > tol){
+            std::cout << "The difference between the eigenvalues is bigger than the tolerance!" << endl <<
+                         "Index: " << i << "     Analytic eigenvalue: " << sorted_e_val_analytic(i) <<
+                         "     Numerical eigenvalue: " << sorted_e_val(i) << "\n\n" ;
+        }
+    } // end of test 1
 
-    //test 1: The largest non-diagonal value is correct (precise) for small matrices (max 5x5)
-    //int n_test = 5;
-    //double max2 = 1e-10;
-    //for (int i=0; i<n_test; i++){
-    //    for (int j=0; j<n_test; j++){
-    //        if (A(i,j)>max){
-    //            max2 = A(i,j);
-    //        }
-    //    }
-    //}           // end of test 1
 
+    // test 2: checking if orthogonality is preserved
+    arma::Mat<double> R_t = R.t();
+    arma::Mat<double> R_i = R.i();
+    for (int i=0; i<n; i++){
+        if (R_t(i) != R_i(i)){
+            std::cout << "The inverse and transpose matrix are not the same!" << endl << R_t(i) << endl << R_i(i) << endl;
+            return 0;
+        }
+    }
 
-    //test 2: sum over all non-diagonal elements is less then a small error
-    //double err = 10e-6;
-    //double sum;
-    //for (int i=0; i<n; i++){
-    //    for (int j=i+1; j<n; j++){
-    //        sum = sum + 2*abs(A(i,j));
-    //}
-    //}
-    //if (sum > err){
-    //   std::cout  << "The sum over the non-diagonal elements is greater than the biggest possible error!" << endl;
-    //}
-    //else{
-    //    std::cout  << "The non-diagonal elements are all good!" << endl;    // maybe delete this
-    //}           // end of test 2
 
 
     return 0;
@@ -124,17 +132,19 @@ double jacobis_method(arma::mat A,int n){
 
 
 int main(){
+    /*
     int n;
+    std::cout << "Size of matrix: ";
     std::cin >> n;
-    //unsigned int n = 5;
+    */
+    int n = 4;
     int d = 5;
     int a = 3;
-    //double tol = 10e-8;
     arma::Mat <double> A = arma::mat(n,n); A.zeros();
 
 
     // Setting up the tridiagonal matrix A
-    for(unsigned int i=0; i<n-1; i++){
+    for(int i=0; i<n-1; i++){
         A(i,i) = d;
         A(i+1,i) = a;
         A(i,i+1) = a;
@@ -146,16 +156,15 @@ int main(){
     arma::Col<double> eig_val;
     arma::eig_sym(eig_val, A);                      // armadillo calculations
     arma::Col<double> lambs(n);
-    for(unsigned int j=0; j<n; j++){                // analytical calculations
+    for(int j=0; j<n; j++){                // analytical calculations
         lambs(j) = lambda_analytical(n, j+1, d, a);
     }
     //std::cout << "Comparing the armadillos version of eigenvalues with the analytical solution:" << std::endl
     //     << "Armadillo:" << std::endl << eig_val << std::endl << "Analytic:" << std::endl << lambs << std::endl;
 
 
-    jacobis_method(A,n);
+    jacobis_method(A,d,a,n);
 
-
-    std::cout << "Analytic eigenvalues: " << endl << eig_val << endl;
+    //std::cout << "Analytic eigenvalues: " << endl << sorted_lambs << endl;
     return 0;
 }
