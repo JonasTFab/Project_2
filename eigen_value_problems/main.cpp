@@ -1,9 +1,12 @@
 #include <iostream>
 #include <armadillo>
 #include <cmath>
+#include <fstream>
+#include <ctime>
+
 
 using namespace std;
-using namespace arma;
+//using namespace arma;
 
 
 double lambda_analytical(int N, double j,double d,double a){
@@ -12,12 +15,11 @@ double lambda_analytical(int N, double j,double d,double a){
 }
 
 
-double jacobis_method(arma::mat A,double d, double a, int n){
+int jacobis_method(arma::mat A,double d, double a, int n){
     double tol = 10e-8;
-    double max = 2*tol;                // just to make max a little bigger than the tolerance before the while loop
+    double max = 2*tol;                // just to make max a little bigger than the tolerance before running the while loop
     int k,l,iter,iter_max;
     double c, s, tou, t_1, t_2, t,a_kk, a_ll, a_ik, a_il, r_ik, r_il;
-    arma::Mat<double> A_og = A;                 // store the original input matrix
     iter = 0;
     iter_max = n*n*n;
 
@@ -36,6 +38,7 @@ double jacobis_method(arma::mat A,double d, double a, int n){
                     }
         }
         }
+        // defines tou, tan, cos and sin
         if (A(k,l) != 0){
             tou = (A(l,l) - A(k,k))/(2*A(k,l));
             t_1 = -tou + sqrt(1+pow(tou,2));
@@ -78,14 +81,14 @@ double jacobis_method(arma::mat A,double d, double a, int n){
             R(i,k) = c*r_ik - s*r_il;
             R(i,l) = c*r_il + s*r_ik;
         }
-        //check if orthogonality is preserved
+        // test 1: check if orthogonality is preserved
         arma::Mat<double> A_tr = A.t(); //transpose A
         for (int i=0; i<n; i++){
             double dots = arma::norm_dot(A_tr.row(i),A.col(i));
             if (abs(dots - 1) > tol){
               std::cout << "Orthogonality is not preserved!!!" << endl;
             }
-        }
+        }       // end of test 1
     }       // end of while loop
 
     arma::Col<double> e_val = arma::vec(n);
@@ -93,11 +96,8 @@ double jacobis_method(arma::mat A,double d, double a, int n){
         e_val(i) = A(i,i);
     }
 
-    //std::cout << "Iterations out of max: " << iter << ":" << iter_max << endl << e_val << endl;
-    //slutt paa plagiat
 
-
-    // test 1: comparing the analytical and numerical eigenvalues
+    // test 2: comparing the analytical and numerical eigenvalues
     arma::Col<double> sorted_e_val, e_val_analytic(n), sorted_e_val_analytic, diff;
     sorted_e_val = arma::sort(e_val);
     for(int i=0; i<n; i++){                // analytical calculations
@@ -111,43 +111,47 @@ double jacobis_method(arma::mat A,double d, double a, int n){
                          "Index: " << i << "     Analytic eigenvalue: " << sorted_e_val_analytic(i) <<
                          "     Numerical eigenvalue: " << sorted_e_val(i) << "\n\n" ;
         }
-    } // end of test 1
+    } // end of test 2
 
-
-    // test 2: checking if orthogonality is preserved
-    /*arma::Mat<double> R_t = R.t();
-    arma::Mat<double> R_i = R.i();
-    for (int i=0; i<n; i++){
-        if (R_t(i) != R_i(i)){
-            std::cout << "The inverse and transpose matrix are not the same!" << endl << R_t(i) << endl << R_i(i) << endl;
-            return 0;
-        }
-    }*/
 
     //OUTPUT!!!!!!!!!!!!!!!!
-    std::cout << "Number of iterations: " << iter << endl ;
-    std::cout << "Theoretical number of rotations between 3n^2-5n^2: " << 3*pow(n,2)<< "-" << 5*pow(n,2)<< endl;
+    //std::cout << "Number of iterations: " << iter << endl ;
+    //std::cout << "Theoretical number of rotations between 3n^2-5n^2: " << 3*pow(n,2)<< "-" << 5*pow(n,2)<< endl;
 
 
-
-
-
-
-    return 0;
+    return iter;
     }
 
+
+
+
+// This function creates a file which stores the number of iterations
+// with respect to the dimension of the matrix using Jacobi's method
+double iterations_per_dimension(arma::mat A, double d, double a, int n){
+    arma::Col<double> dimensions = arma::vec(int (n/5));
+    arma::Col<double> iterations = arma::vec(int (n/5));
+    std::ofstream data;
+    data.open("iter_per_dim.txt");
+    for (int i=0; i<int (n/5); i++){
+        dimensions(i) = 5*(i+1);
+        iterations(i) = int(jacobis_method(A,d,a, dimensions(i)));
+        std::cout << "Dimension: " << dimensions(i) << "     Iterations: " << iterations(i) << endl;
+        data << dimensions(i) << " " << iterations(i) << endl;
+    }
+    data.close();
+
+    return 0;
+}
 
 
 
 
 
 int main(){
-
     int n;
     std::cout << "Size of matrix: ";
     std::cin >> n;
-
-    //int n = 4;
+    //int n = 20;
     int d = 5;
     int a = 3;
     arma::Mat <double> A = arma::mat(n,n); A.zeros();
@@ -164,17 +168,30 @@ int main(){
 
     // armadillo and analytical calculation of eigenvalues
     arma::Col<double> eig_val;
+    time_t time_arma_0 = time(NULL);
     arma::eig_sym(eig_val, A);                      // armadillo calculations
+    time_t time_arma_1 = time(NULL);
     arma::Col<double> lambs(n);
-    for(int j=0; j<n; j++){                // analytical calculations
+    for(int j=0; j<n; j++){                         // analytical calculations
         lambs(j) = lambda_analytical(n, j+1, d, a);
     }
     //std::cout << "Comparing the armadillos version of eigenvalues with the analytical solution:" << std::endl
     //     << "Armadillo:" << std::endl << eig_val << std::endl << "Analytic:" << std::endl << lambs << std::endl;
 
 
+    // running the Jacobi's rotational algorithm to find eigenvalues
+    time_t time_jaco_0 = time(NULL);
     jacobis_method(A,d,a,n);
+    time_t time_jaco_1 = time(NULL);
 
-    //std::cout << "Analytic eigenvalues: " << endl << sorted_lambs << endl;
+    double t_arma, t_jaco;
+    t_arma = time_arma_1-time_arma_0;
+    t_jaco = time_jaco_1-time_jaco_0;
+    std::cout << "Time in seconds using armadillo and Jacobi's method with n = " << n << endl
+              << "Armadillo time: " << t_arma << endl << "Jacobi time: " << t_jaco << endl;
+
+    // creating a file for plotting in python
+    //iterations_per_dimension(A,d,a,n);
+
     return 0;
 }
