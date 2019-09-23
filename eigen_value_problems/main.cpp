@@ -78,10 +78,13 @@ double jacobis_method(arma::mat A,double d, double a, int n){
             R(i,k) = c*r_ik - s*r_il;
             R(i,l) = c*r_il + s*r_ik;
         }
-        arma::Mat<double> A_t = A.t();
+        //check if orthogonality is preserved
+        arma::Mat<double> A_tr = A.t(); //transpose A
         for (int i=0; i<n; i++){
-            arma::Col<double> A_t_col_vec = A_t(i)
-            arma::Col<double> dot = arma::dot(A_t, A_og);
+            double dots = arma::norm_dot(A_tr.row(i),A.col(i));
+            if (abs(dots - 1) > tol){
+              std::cout << "Orthogonality is not preserved!!!" << endl;
+            }
         }
     }       // end of while loop
 
@@ -112,14 +115,21 @@ double jacobis_method(arma::mat A,double d, double a, int n){
 
 
     // test 2: checking if orthogonality is preserved
-    arma::Mat<double> R_t = R.t();
+    /*arma::Mat<double> R_t = R.t();
     arma::Mat<double> R_i = R.i();
     for (int i=0; i<n; i++){
         if (R_t(i) != R_i(i)){
             std::cout << "The inverse and transpose matrix are not the same!" << endl << R_t(i) << endl << R_i(i) << endl;
             return 0;
         }
-    }
+    }*/
+
+    //OUTPUT!!!!!!!!!!!!!!!!
+    std::cout << "Number of iterations: " << iter << endl ;
+    std::cout << "Theoretical number of rotations between 3n^2-5n^2: " << 3*pow(n,2)<< "-" << 5*pow(n,2)<< endl;
+
+
+
 
 
 
@@ -132,12 +142,12 @@ double jacobis_method(arma::mat A,double d, double a, int n){
 
 
 int main(){
-    /*
+
     int n;
     std::cout << "Size of matrix: ";
     std::cin >> n;
-    */
-    int n = 4;
+
+    //int n = 4;
     int d = 5;
     int a = 3;
     arma::Mat <double> A = arma::mat(n,n); A.zeros();
