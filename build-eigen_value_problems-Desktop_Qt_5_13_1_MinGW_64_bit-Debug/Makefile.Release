@@ -16,10 +16,10 @@ CXX           = g++
 DEFINES       = -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG
 CFLAGS        = -fno-keep-inline-dllexport -O2 -Wall -W -Wextra $(DEFINES)
 CXXFLAGS      = -fno-keep-inline-dllexport -O2 -std=gnu++11 -Wall -W -Wextra -fexceptions -mthreads $(DEFINES)
-INCPATH       = -I..\eigen_value_problems -I. -I/usr/local/include -ID:\armadillo-9.700.2\include -ID:\Qt\5.13.1\mingw73_64\mkspecs\win32-g++ 
+INCPATH       = -I..\eigen_value_problems -I. -ID:\armadillo-9.700.2\include -ID:\Qt\5.13.1\mingw73_64\mkspecs\win32-g++ 
 LINKER      =        g++
 LFLAGS        =        -Wl,-s -Wl,-subsystem,console -mthreads
-LIBS        =        -L\usr\local\Cellar -larmadillo -llapack -lblas -LD:\armadillo-9.700.2\examples\lib_win64 -llapack_win64_MT -lblas_win64_MT   
+LIBS        =        -LD:\armadillo-9.700.2\examples\lib_win64 -llapack_win64_MT -lblas_win64_MT   
 QMAKE         = D:\Qt\5.13.1\mingw73_64\bin\qmake.exe
 IDC           = idc
 IDL           = midl

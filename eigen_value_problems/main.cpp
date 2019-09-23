@@ -126,7 +126,7 @@ arma::Mat<double> jacobis_method(arma::mat A,int n){
 
 
 int main(){
-    unsigned int n = 50;
+    unsigned int n = 10;
     int d = 5;
     int a = 3;
     //double tol = 10e-8;
