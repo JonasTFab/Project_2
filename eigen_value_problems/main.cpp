@@ -3,7 +3,7 @@
 #include <cmath>
 
 using namespace std;
-using namespace arma;
+//using namespace arma;
 
 
 double lambda_analytical(int N, double j,double d,double a){
@@ -12,26 +12,24 @@ double lambda_analytical(int N, double j,double d,double a){
 }
 
 
-arma::Mat<double> jacobis_method(arma::mat A,int n){
-    double tol = 10e-8;
+double jacobis_method(arma::mat A,int n){
+    double tol = 10e-6;
     double max = 2*tol;
     int k,l,iter,iter_max;
     double c, s, tou, t_1, t_2, t,a_kk, a_ll, a_ik, a_il, r_ik, r_il;
-
+    iter = 0;
     iter_max = n*n*n;
     // Setting up the eigenvector matrix
     arma::Mat<double> R = arma::mat(n,n); R.eye();         // R.eye() automatically sets identity matrix
-
-    while (max>tol && iter < iter_max){
+    while (max > tol && iter < iter_max){
         iter++;
-        max = 2*tol;
-        std::cout << iter << "\t\r" << std::flush;
+        max = tol;
         for (int i = 0; i < n; i++){           // finds max value of off-diagonal elements assuming symmetric matrix
             for (int j = i+1; j < n; j++){
                 double aij = abs(A(i,j));
                 if (aij > max){
                     max = aij; k = i; l = j;
-        }
+                    }
         }
         }
         if (A(k,l) != 0){
@@ -117,7 +115,7 @@ arma::Mat<double> jacobis_method(arma::mat A,int n){
     //}           // end of test 2
 
 
-    return A;
+    return 0;
     }
 
 
@@ -126,7 +124,9 @@ arma::Mat<double> jacobis_method(arma::mat A,int n){
 
 
 int main(){
-    unsigned int n = 10;
+    int n;
+    std::cin >> n;
+    //unsigned int n = 5;
     int d = 5;
     int a = 3;
     //double tol = 10e-8;
