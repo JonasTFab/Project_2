@@ -93,6 +93,7 @@ int jacobis_method(arma::mat A, arma::Col<double> d, arma::Col<double> a, int n)
 
     // Puts the diagonal elements (eigenvalues) in matrix A into a column vector
     arma::Col<double> e_val = arma::vec(n);
+    arma::Col<double> sorted_e_val, e_val_analytic(n),sorted_e_val_analytic, diff;
     for (int i=0; i<n; i++){
         e_val(i) = A(i,i);
     }
@@ -100,7 +101,6 @@ int jacobis_method(arma::mat A, arma::Col<double> d, arma::Col<double> a, int n)
 
     // test 2a: comparing the analytical and numerical eigenvalues (works only for a Töplitz matrix)
     if (d(0)==d(1) && d(0)==d(n-1) && a(0)==a(1) && a(0)==a(n-1)){
-        arma::Col<double> sorted_e_val, e_val_analytic(n), sorted_e_val_analytic, diff;
         sorted_e_val = arma::sort(e_val);
         for(int i=0; i<n; i++){                // analytical calculations
             e_val_analytic(i) = lambda_analytical(n, i+1, d(0), a(0));
@@ -115,17 +115,16 @@ int jacobis_method(arma::mat A, arma::Col<double> d, arma::Col<double> a, int n)
         }
         }
     } // end of test 2a
-
     // test 2b: comparing the analytical and numerical eigenvalues (works for Schrödinger equation)
     else if (d(0)!=d(1) && d(0)!=d(n-1) && a(0)==a(1) && a(0)==a(n-1)){
-        arma::Col<double> sorted_e_val, e_val_analytic(n), diff;
+      double  tol_4 = 10e-3; //4 leading digits
         sorted_e_val = arma::sort(e_val);
         for (int i=0; i<n; i++){
             e_val_analytic(i) = 3 + i*4;       // assuming there exists a pattern for the eigenvalues
         }
-        for (int i=0; i<n; i++){
+        for (int i=0; i<4; i++){
             double diff = sorted_e_val(i) - e_val_analytic(i);
-            if (abs(diff) > tol){
+            if (abs(diff) > tol_4){
                 std::cout << "The difference between the eigenvalues are bigger than the tolerance!" << endl <<
                          "Index: " << i << "     Analytic eigenvalue: " << e_val_analytic(i) <<
                          "     Numerical eigenvalue: " << sorted_e_val(i) << "\n\n" ;
@@ -137,10 +136,9 @@ int jacobis_method(arma::mat A, arma::Col<double> d, arma::Col<double> a, int n)
         arma::cout << "Missing an analytic solution to compare with!" << endl;
         return 0;
     }
-
-
     //OUTPUT!!!!!!!!!!!!!!!!
     //std::cout << "The calculated eigenvalues is: " << endl << e_val << "\n\n";
+    //std::cout << "The analytical eigenvalues is: " << endl << e_val_analytic << "\n\n";
     //std::cout << "Number of iterations: " << iter << "\n\n" ;
     //std::cout << "Theoretical number of rotations between 3n^2-5n^2: " << 3*pow(n,2)<< "-" << 5*pow(n,2)<< "\n\n";
 
@@ -176,23 +174,26 @@ double schrodinger_solver(int N){
     // some initial conditions
     double rho_min, rho_N, h;
     rho_min = 0;
-    rho_N = 1000;
-    h = (rho_N-rho_min)/N;
+    //rho_N = 3.55;
+    double rho;
+    std::cout << "Chose rho_N: ";
+    std::cin >> rho_N;
+    h = (rho_N-rho_min)/(N-1);
+    //cout << "h: " << h << endl;
     arma::Col<double> rho = arma::linspace(rho_min,rho_N,N);
     arma::Col<double> V = pow(rho,2);
     arma::Col<double> d = (2/pow(h,2))+V;
     arma::Col<double> e = arma::vec(N).ones()*((-1)/pow(h,2));
-    cout << rho << endl << V << endl << d << endl << e << endl;
+    //cout << "rho: " << endl << rho << endl;
 
     // setting up the Schrödinger matrix
     arma::Mat<double> S = arma::mat(N,N);
-    for (int i=0; i<N-1; i++){
+    for (int i=0; i < N-1; i++){
         S(i,i) = d(i);
         S(i+1,i) = e(i);
         S(i,i+1)= e(i);
     }
     S(N-1,N-1) = d(N-1);
-
     jacobis_method(S,d,e,N);
 
 
@@ -211,8 +212,8 @@ int main(){
     std::cout << "Size of matrix: ";
     std::cin >> n;
     //int n = 20;
-    arma::Col<double> d = arma::vec(n).ones()*5;
-    arma::Col<double> a = arma::vec(n).ones()*3;
+    arma::Col<double> d = arma::vec(n).ones()*7;
+    arma::Col<double> a = arma::vec(n).ones()*-3;
     arma::Mat <double> A = arma::mat(n,n).zeros();
 
 
