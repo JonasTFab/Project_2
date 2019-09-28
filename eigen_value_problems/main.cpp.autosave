@@ -324,7 +324,7 @@ int main(){
     schrodinger_solver(n);
     time_t time_SE_1 = time(NULL);
     t_SE = time_SE_1 - time_SE_0;
-    std::cout << "Time in seconds solving the Schrödinger equations with n = " << n << ": " << t_SE << "seconds" << endl;
+    std::cout << "Time in seconds solving the Schrödinger equations with n = " << n << ": " << t_SE << " seconds" << endl;
 
     // solves Schrödinger equation for two electrons
     //schrodinger_solver_two_electrons(n);
