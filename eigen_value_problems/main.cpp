@@ -257,7 +257,7 @@ int main(){
     time_t time_SE_0 = time(NULL);
     schrodinger_solver(n);
     time_t time_SE_1 = time(NULL);
-    t_SE = time_SE_1 - time_SE_0;
+    double t_SE = time_SE_1 - time_SE_0;
     std::cout << "Time in seconds solving the Schrödinger equations with n = " << n << ": " << t_SE << "seconds" << endl;
 
 
